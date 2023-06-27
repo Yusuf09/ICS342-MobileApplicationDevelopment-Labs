@@ -1,18 +1,22 @@
 package com.ics342.labs
 
 import android.os.Bundle
-import android.view.Display
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.ics342.labs.data.DataItem
@@ -48,7 +52,7 @@ class MainActivity : ComponentActivity() {
             LabsTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                   DataItemList(dataItems = dataItems)
+                    DataItemList(dataItems = dataItems)
                 }
             }
         }
@@ -64,22 +68,57 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun DataItemView(dataItem: DataItem) {
+fun DataItemView(dataItem: DataItem, onItemClick: () -> Unit) {
     /* Create the view for the data item her. */
+
+    val showDialog = remember { mutableStateOf(false) }
+
     Column {
         Text(text = "ID: ${dataItem.id}")
         Text(text = "Name: ${dataItem.name}")
         Text(text = "Description: ${dataItem.description}")
+
+        Button(onClick = {
+            onItemClick()
+        }) {
+            Text(text = "Show Dialog")
+        }
     }
 }
 
+
 @Composable
 fun DataItemList(dataItems: List<DataItem>) {
+    var selectedItem by remember { mutableStateOf<DataItem?>(null) }
+    var showDialog by remember { mutableStateOf(false) }
+
     /* Create the list here. This function will call DataItemView() */
-    LazyColumn{
+    LazyColumn {
         items(dataItems) { dataItem ->
-            DataItemView(dataItem = dataItem)
+            DataItemView(dataItem = dataItem) {
+                selectedItem = dataItem
+                showDialog = true
+            }
         }
+    }
+
+    if (selectedItem != null) {
+        AlertDialog(
+            onDismissRequest = {
+                selectedItem = null
+                showDialog = false
+            },
+            title = { Text(text = selectedItem?.name ?: "") },
+            text = { Text(text = selectedItem?.description ?: "") },
+            confirmButton = {
+                Button(onClick = {
+                    selectedItem = null
+                    showDialog = false
+                }) {
+                    Text(text = "Okay")
+                }
+            }
+        )
     }
 }
 

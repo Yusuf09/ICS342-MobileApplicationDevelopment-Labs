@@ -4,6 +4,7 @@ import android.Manifest.permission
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.IBinder
@@ -14,11 +15,11 @@ import java.util.UUID
 
 class NotificationService: Service() {
 
-    private val notificationManager: NotificationManagerCompat =
-        NotificationManagerCompat.from(this)
+    private lateinit var notificationManager: NotificationManagerCompat
 
     override fun onCreate() {
         super.onCreate()
+        notificationManager = NotificationManagerCompat.from(this)
         createNotificationChannel()
     }
 
@@ -34,11 +35,17 @@ class NotificationService: Service() {
             return START_NOT_STICKY
         }
 
-       // Build notification
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Lab 8 Notification")
+            .setContentText("This is Lab 8 notification.")
+            .setSmallIcon(R.drawable.star)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
 
-        TODO("Build and show notification")
+        startForeground(NOTIFICATION_ID, notification)
         return START_STICKY_COMPATIBILITY
     }
+
 
     override fun onBind(intent: Intent?): IBinder? {
         // No need to implement for lab 8
@@ -46,11 +53,20 @@ class NotificationService: Service() {
     }
 
     private fun createNotificationChannel() {
-        TODO("Create notification channel and register with the system")
+        val name = "Lab 8 Channel"
+        val descriptionText = "Channel for Lab 8 notifications"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
+        }
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
+
     companion object {
-        private const val CHANNEL_ID = "LAB_7_CHANNEL_ID"
+        private const val CHANNEL_ID = "LAB_8_CHANNEL_ID"
         private const val NOTIFICATION_ID = 1234
     }
 }
